@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Http\Resources\EmployeeResource;
+use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -44,17 +46,9 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreEmployeeRequest $request)
     {
-        $validated = $request->validate([
-            'department_id' => 'required|exists:departments,id',
-            'employee_number' => 'required|string|max:30|unique:employees,employee_number',
-            'first_name' => 'required|string|max:80',
-            'last_name' => 'required|string|max:80',
-            'email' => 'required|email|unique:employees,email',
-            'position' => 'required|string|max:100',
-            'employment_status' => 'required|in:Active,Inactive',
-        ]);
+        $validated = $request->validated();
 
         $employee = Employee::create($validated);
         $employee->load('department');
@@ -65,17 +59,9 @@ class EmployeeController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(Request $request, Employee $employee)
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
-        $validated = $request->validate([
-            'department_id' => 'sometimes|required|exists:departments,id',
-            'employee_number' => 'sometimes|required|string|max:30|unique:employees,employee_number,' . $employee->id,
-            'first_name' => 'sometimes|required|string|max:80',
-            'last_name' => 'sometimes|required|string|max:80',
-            'email' => 'sometimes|required|email|unique:employees,email,' . $employee->id,
-            'position' => 'sometimes|required|string|max:100',
-            'employment_status' => 'sometimes|required|in:Active,Inactive',
-        ]);
+        $validated = $request->validated();
 
         $employee->update($validated);
         $employee->load('department');
